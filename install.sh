@@ -1,16 +1,16 @@
 #!/bin/bash
-# Instalador de clap-spotify para macOS.
+# Instalador de iClap para macOS.
 # Crea el entorno, deja tu config lista y arranca el detector al iniciar sesión.
 set -e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-LABEL="com.clapspotify.detector"
+LABEL="com.iclap.detector"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 PY="$DIR/.venv/bin/python"
 
 cd "$DIR"
 
-echo "👏 Instalando clap-spotify en: $DIR"
+echo "👏 Instalando iClap en: $DIR"
 
 # 1) Entorno virtual + dependencias
 if [ ! -d ".venv" ]; then
@@ -38,7 +38,7 @@ cat > "$PLIST" <<PLIST_EOF
     <key>ProgramArguments</key>
     <array>
         <string>$PY</string>
-        <string>$DIR/clap_play.py</string>
+        <string>$DIR/iclap.py</string>
     </array>
     <key>EnvironmentVariables</key>
     <dict>
@@ -54,9 +54,9 @@ cat > "$PLIST" <<PLIST_EOF
     <key>WorkingDirectory</key>
     <string>$DIR</string>
     <key>StandardOutPath</key>
-    <string>$DIR/clap.log</string>
+    <string>$DIR/iclap.log</string>
     <key>StandardErrorPath</key>
-    <string>$DIR/clap.err</string>
+    <string>$DIR/iclap.err</string>
 </dict>
 </plist>
 PLIST_EOF
@@ -83,6 +83,6 @@ cat <<MSG
       launchctl kickstart -k "gui/$(id -u)/$LABEL"
 
 Luego: aplaude DOS veces 👏👏 y suena tu playlist.
-Logs:  tail -f "$DIR/clap.log"
+Logs:  tail -f "$DIR/iclap.log"
 ────────────────────────────────────────────────────────
 MSG

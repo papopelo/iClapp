@@ -1,7 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
-clap.log
-clap.err
+iclap.log
+iclap.err
 config.json
 *.plist

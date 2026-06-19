@@ -1,4 +1,4 @@
-# 👏 clap-spotify
+# 👏 iClap
 
 Aplaude **dos veces** y tu Mac reproduce tu playlist de Spotify en shuffle.
 Corre en segundo plano y arranca solo al iniciar sesión.
@@ -16,8 +16,8 @@ de la voz o la tos (más largas). No graba ni envía nada: todo es local.
 ## Instalación
 
 ```bash
-git clone <este-repo> clap-spotify
-cd clap-spotify
+git clone <este-repo> iClap
+cd iClap
 ./install.sh
 ```
 
@@ -34,7 +34,7 @@ Después haz estos tres pasos (te los recuerda al final):
    Esto además dispara el diálogo de **permiso de micrófono** de macOS: acéptalo.
 3. **Reinicia el servicio** para aplicar todo:
    ```bash
-   launchctl kickstart -k gui/$(id -u)/com.clapspotify.detector
+   launchctl kickstart -k gui/$(id -u)/com.iclap.detector
    ```
 
 Listo: **aplaude dos veces** 👏👏 y suena tu playlist.
@@ -63,9 +63,9 @@ Listo: **aplaude dos veces** 👏👏 y suena tu playlist.
 ## Logs y control del servicio
 
 ```bash
-tail -f clap.log                                          # ver actividad
-launchctl kickstart -k gui/$(id -u)/com.clapspotify.detector  # reiniciar
-./uninstall.sh                                            # quitar el servicio
+tail -f iclap.log                                     # ver actividad
+launchctl kickstart -k gui/$(id -u)/com.iclap.detector  # reiniciar
+./uninstall.sh                                        # quitar el servicio
 ```
 
 ## Problemas comunes

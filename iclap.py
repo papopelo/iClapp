@@ -4,9 +4,9 @@ Detecta dos aplausos seguidos y reproduce
 una playlist en Spotify con shuffle activado.
 
 Uso:
-    python clap_play.py            # modo normal
-    python clap_play.py --debug    # muestra el nivel de audio para calibrar
-    python clap_play.py --threshold 0.4
+    python iclap.py            # modo normal
+    python iclap.py --debug    # muestra el nivel de audio para calibrar
+    python iclap.py --threshold 0.4
 """
 
 import argparse
@@ -159,13 +159,18 @@ def calibrate(n=5):
     print(f"🎚️  Calibración: aplaude {n} veces, una a una, con ~1 s entre cada una.")
     print("   (empieza cuando quieras; Ctrl+C para cancelar)\n")
 
-    floor = DEFAULT_THRESHOLD * SUSTAIN_FACTOR   # umbral mínimo de "hay sonido"
+    # Piso bajo (no DEFAULT_THRESHOLD*SUSTAIN) para no perder aplausos de micros
+    # flojos; el filtro real de "esto fue un aplauso" es CAPTURE_MIN abajo.
+    CAPTURE_FLOOR = 0.05     # entra a "racha" cualquier sonido por encima de esto
+    CAPTURE_MIN = 0.12       # pico mínimo para contar como aplauso (no roce/ruido)
+    TIMEOUT_S = 30.0         # no esperar para siempre si el micro no oye
+    MIN_CLAPS = 3            # con 3 ya se puede calibrar; ideal n
     claps = []                                   # (pico, duración_ms) por aplauso
     run = {"len": 0, "peak": 0.0}
 
     def cb(indata, frames, time_info, status):
         peak = float(np.abs(indata).max())
-        if peak >= floor:
+        if peak >= CAPTURE_FLOOR:
             run["len"] += 1
             run["peak"] = max(run["peak"], peak)
         elif run["len"] > 0:
@@ -173,17 +178,24 @@ def calibrate(n=5):
             rpeak = run["peak"]
             run["len"] = 0
             run["peak"] = 0.0
-            if rpeak >= DEFAULT_THRESHOLD * 0.6 and dur <= 400:
+            if rpeak >= CAPTURE_MIN and dur <= 400:
                 claps.append((rpeak, dur))
                 print(f"   👏 {len(claps)}/{n}  pico:{rpeak:5.3f}  dur:{dur:4.0f}ms")
 
     try:
         with sd.InputStream(channels=1, samplerate=SAMPLERATE,
                             blocksize=BLOCKSIZE, callback=cb):
-            while len(claps) < n:
+            start = time.monotonic()
+            while len(claps) < n and (time.monotonic() - start) < TIMEOUT_S:
                 time.sleep(0.05)
     except KeyboardInterrupt:
         print("\n✋ Calibración cancelada.")
+        return
+
+    if len(claps) < MIN_CLAPS:
+        print(f"\n⚠️  Solo detecté {len(claps)} aplauso(s) en {TIMEOUT_S:.0f}s.")
+        print("   Revisa el permiso de micrófono y aplaude más fuerte/cerca; "
+              "luego prueba de nuevo con --calibrate.")
         return
 
     peaks = [p for p, _ in claps]
@@ -284,7 +296,7 @@ def main():
             bars = int(peak * 40)
             print(f"\r nivel:{peak:5.3f} {'█' * bars:<40}", end="", flush=True)
 
-    print("🎧 Escuchando... aplaude DOS veces para reproducir la canción.")
+    print("🎧 Escuchando... aplaude DOS veces para reproducir tu playlist.")
     print(f"   (umbral={args.threshold}, dur.máx≈{args.max_clap_ms:.0f}ms, Ctrl+C para salir)")
     if args.debug:
         print("   [debug: cada sonido muestra su pico y duración; aplauso = breve]\n")
