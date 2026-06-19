@@ -1,0 +1,7 @@
+{
+  "_comentario": "Copia este archivo a config.json y pon tu playlist. Pega la URI (spotify:playlist:...) o el enlace web (https://open.spotify.com/playlist/...). 'threshold' y 'max_clap_ms' los ajusta solo el modo --calibrate.",
+  "playlist_uri": "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M",
+  "threshold": 0.45,
+  "max_clap_ms": 160,
+  "shuffle": true
+}

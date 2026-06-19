@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Detecta dos aplausos seguidos y reproduce
-"Should I Stay or Should I Go" - The Clash en Spotify.
+una playlist en Spotify con shuffle activado.
 
 Uso:
     python clap_play.py            # modo normal
@@ -10,15 +10,21 @@ Uso:
 """
 
 import argparse
+import json
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
 import sounddevice as sd
 
-# --- Configuración de la canción ---------------------------------------------
-TRACK_URI = "spotify:track:02DZxszCWyn3UivsWTblnq"  # The Clash - Should I Stay or Should I Go
+CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
+
+# --- Configuración de la playlist --------------------------------------------
+# Valor por defecto si no hay config.json. Cada usuario pone la suya en config.json
+# (ver config.example.json) o con --playlist. Esta es solo de muestra.
+PLAYLIST_URI = "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M"  # "Today's Top Hits" (muestra)
 
 # --- Parámetros de detección -------------------------------------------------
 SAMPLERATE = 44100        # Hz
@@ -56,42 +62,166 @@ def hf_ratio(block):
     return float(mag[_HF_MASK].sum() / total)
 
 
-def play_track():
-    """Lanza/usa Spotify y reproduce el track vía AppleScript.
+def wea_bakn_spotify(playlist_uri, shuffle=True):
+    """Lanza/usa Spotify y reproduce la playlist (en shuffle) vía AppleScript.
 
     Si Spotify estaba cerrado, al abrirse a veces queda en pausa; por eso
-    cargamos el track, esperamos un poco y forzamos 'play'.
+    cargamos la playlist, esperamos un poco y forzamos 'play'. Como 'play track'
+    sobre una playlist empieza siempre por la primera pista, al activar el shuffle
+    saltamos de pista para arrancar en una canción al azar.
     """
+    shuffle_setup = 'set shuffling to true' if shuffle else 'set shuffling to false'
+    shuffle_jump = 'next track\n        delay 0.2' if shuffle else ''
     script = f'''
     if application "Spotify" is not running then
         tell application "Spotify" to activate
         delay 1.5
     end if
     tell application "Spotify"
-        play track "{TRACK_URI}"
-        delay 0.5
+        {shuffle_setup}
+        play track "{playlist_uri}"
+        delay 0.4
+        {shuffle_jump}
         if player state is not playing then play
     end tell
     '''
     try:
         subprocess.run(["osascript", "-e", script], check=True,
                        capture_output=True, text=True)
-        print("🎸 ¡Should I Stay or Should I Go!")
+        print("🎸 ¡Playlist en shuffle!" if shuffle else "🎸 ¡Playlist!")
     except subprocess.CalledProcessError as e:
         print(f"⚠️  Error al reproducir: {e.stderr.strip()}", file=sys.stderr)
 
 
+def normalize_playlist(value):
+    """Acepta una URI (spotify:playlist:ID) o un enlace web y devuelve la URI.
+
+    Ej.: 'https://open.spotify.com/playlist/ABC?si=xyz' -> 'spotify:playlist:ABC'.
+    Así la gente puede pegar lo que copie de Spotify sin pensar en el formato.
+    """
+    value = value.strip()
+    if value.startswith("spotify:"):
+        return value
+    if "open.spotify.com" in value:
+        path = value.split("open.spotify.com/", 1)[1].split("?", 1)[0]
+        kind, _, pid = path.strip("/").partition("/")
+        if kind and pid:
+            return f"spotify:{kind}:{pid}"
+    return value  # se deja tal cual; Spotify reportará si es inválida
+
+
+def load_config():
+    """Lee config.json (si existe) y lo mezcla sobre los valores por defecto.
+
+    Cada persona tiene su propio config.json (gitignored); así nadie edita
+    el código para poner su playlist o su sensibilidad.
+    """
+    cfg = {
+        "playlist_uri": PLAYLIST_URI,
+        "threshold": DEFAULT_THRESHOLD,
+        "max_clap_ms": MAX_CLAP_MS,
+        "shuffle": True,
+    }
+    try:
+        with open(CONFIG_PATH) as f:
+            user = json.load(f)
+        cfg.update({k: user[k] for k in cfg if k in user})
+    except FileNotFoundError:
+        pass
+    except (json.JSONDecodeError, OSError) as e:
+        print(f"⚠️  config.json inválido ({e}); uso valores por defecto.",
+              file=sys.stderr)
+    return cfg
+
+
+def save_config(updates):
+    """Mezcla `updates` sobre el config.json actual y lo escribe (preserva el resto)."""
+    current = {}
+    try:
+        with open(CONFIG_PATH) as f:
+            current = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        pass
+    current.update(updates)
+    with open(CONFIG_PATH, "w") as f:
+        json.dump(current, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    return current
+
+
+def calibrate(n=5):
+    """Captura N aplausos reales y deduce umbral + duración para este micro/persona.
+
+    Resuelve el problema central del proyecto: la sensibilidad depende del micro
+    y de las manos de cada uno. Mide pico y duración de cada aplauso y deja un
+    margen para que detecte de forma fiable sin disparar con ruido.
+    """
+    print(f"🎚️  Calibración: aplaude {n} veces, una a una, con ~1 s entre cada una.")
+    print("   (empieza cuando quieras; Ctrl+C para cancelar)\n")
+
+    floor = DEFAULT_THRESHOLD * SUSTAIN_FACTOR   # umbral mínimo de "hay sonido"
+    claps = []                                   # (pico, duración_ms) por aplauso
+    run = {"len": 0, "peak": 0.0}
+
+    def cb(indata, frames, time_info, status):
+        peak = float(np.abs(indata).max())
+        if peak >= floor:
+            run["len"] += 1
+            run["peak"] = max(run["peak"], peak)
+        elif run["len"] > 0:
+            dur = run["len"] * BLOCK_MS
+            rpeak = run["peak"]
+            run["len"] = 0
+            run["peak"] = 0.0
+            if rpeak >= DEFAULT_THRESHOLD * 0.6 and dur <= 400:
+                claps.append((rpeak, dur))
+                print(f"   👏 {len(claps)}/{n}  pico:{rpeak:5.3f}  dur:{dur:4.0f}ms")
+
+    try:
+        with sd.InputStream(channels=1, samplerate=SAMPLERATE,
+                            blocksize=BLOCKSIZE, callback=cb):
+            while len(claps) < n:
+                time.sleep(0.05)
+    except KeyboardInterrupt:
+        print("\n✋ Calibración cancelada.")
+        return
+
+    peaks = [p for p, _ in claps]
+    durs = [d for _, d in claps]
+    # Umbral: justo por debajo del aplauso más flojo (70%). Duración: por encima
+    # del aplauso más largo (1.3x), redondeada a 10 ms.
+    threshold = round(max(0.1, min(peaks) * 0.7), 2)
+    max_clap_ms = int(round(max(durs) * 1.3 / 10.0) * 10)
+    print(f"\n✅ Calibrado: threshold={threshold}, max_clap_ms={max_clap_ms}")
+    save_config({"threshold": threshold, "max_clap_ms": max_clap_ms})
+    print(f"   Guardado en {CONFIG_PATH.name}. Reinicia el servicio para aplicarlo.")
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Reproduce una canción al aplaudir dos veces.")
-    parser.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD,
+    cfg = load_config()
+    parser = argparse.ArgumentParser(description="Reproduce una playlist al aplaudir dos veces.")
+    parser.add_argument("--threshold", type=float, default=cfg["threshold"],
                         help="Sensibilidad del aplauso (0..1). Más bajo = más sensible.")
     parser.add_argument("--hf-ratio", type=float, default=DEFAULT_HF_RATIO,
                         help="Mínimo de agudos (0..1) para distinguir aplauso de tos/voz.")
-    parser.add_argument("--max-clap-ms", type=float, default=MAX_CLAP_MS,
+    parser.add_argument("--max-clap-ms", type=float, default=cfg["max_clap_ms"],
                         help="Duración máxima de un aplauso en ms (más largo = tos/ruido).")
+    parser.add_argument("--playlist", default=cfg["playlist_uri"],
+                        help="URI/enlace de la playlist de Spotify a reproducir.")
+    parser.add_argument("--no-shuffle", action="store_true",
+                        help="Reproduce la playlist en orden, sin shuffle.")
+    parser.add_argument("--calibrate", action="store_true",
+                        help="Mide tus aplausos y ajusta la sensibilidad automáticamente.")
     parser.add_argument("--debug", action="store_true",
                         help="Muestra nivel y agudos para calibrar.")
     args = parser.parse_args()
+
+    if args.calibrate:
+        calibrate()
+        return
+
+    playlist_uri = normalize_playlist(args.playlist)
+    shuffle = cfg["shuffle"] and not args.no_shuffle
 
     sustain = args.threshold * SUSTAIN_FACTOR
     max_clap_blocks = max(1, round(args.max_clap_ms / BLOCK_MS))
@@ -112,7 +242,7 @@ def main():
         if state["first_clap"] and (t - state["first_clap"]) <= DOUBLE_WINDOW:
             if not args.debug:
                 print("👏👏 doble aplauso detectado")
-            play_track()
+            wea_bakn_spotify(playlist_uri, shuffle)
             state["first_clap"] = 0.0
             state["muted_until"] = t + COOLDOWN
         else:

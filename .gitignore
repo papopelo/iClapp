@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 clap.log
 clap.err
+config.json
+*.plist
