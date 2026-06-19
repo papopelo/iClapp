@@ -12,6 +12,7 @@ APP = ["iclap_app.py"]
 DATA_FILES = []
 OPTIONS = {
     "argv_emulation": False,
+    "iconfile": "icon.icns",
     # _sounddevice_data debe ir SIN comprimir: contiene libportaudio.dylib, y una
     # .dylib no se puede cargar desde dentro del zip (dlopen falla con errno=20).
     "packages": ["iclap", "numpy", "sounddevice", "_sounddevice_data", "rumps"],
