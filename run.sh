@@ -10,4 +10,4 @@ if [ ! -d ".venv" ]; then
   ./.venv/bin/pip install --quiet -r requirements.txt
 fi
 
-exec ./.venv/bin/python iclap.py "$@"
+exec ./.venv/bin/python -m iclap "$@"

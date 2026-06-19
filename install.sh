@@ -29,10 +29,13 @@ if [ ! -d ".venv" ]; then
   "$DIR/.venv/bin/pip" install --quiet -r requirements.txt
 fi
 
-# 2) Config personal (no se sobrescribe si ya existe)
-if [ ! -f "config.json" ]; then
-  cp config.example.json config.json
-  echo "📝 Creado config.json. Edítalo y pon tu playlist (o usa --playlist)."
+# 2) Config personal en Application Support (la usa tanto el CLI como el .app)
+CONFIG_DIR="$HOME/Library/Application Support/iClap"
+CONFIG="$CONFIG_DIR/config.json"
+mkdir -p "$CONFIG_DIR"
+if [ ! -f "$CONFIG" ]; then
+  cp config.example.json "$CONFIG"
+  echo "📝 Creado $CONFIG — edítalo y pon tu URL."
 fi
 
 # 3) Generar el LaunchAgent con las rutas de ESTE usuario
@@ -47,7 +50,8 @@ cat > "$PLIST" <<PLIST_EOF
     <key>ProgramArguments</key>
     <array>
         <string>$PY</string>
-        <string>$DIR/iclap.py</string>
+        <string>-m</string>
+        <string>iclap</string>
     </array>
     <key>EnvironmentVariables</key>
     <dict>
@@ -84,14 +88,14 @@ cat <<MSG
 ────────────────────────────────────────────────────────
 ✅ Casi listo. Falta UN paso (permiso de micrófono):
 
-   1) Edita tu playlist:   nano "$DIR/config.json"
+   1) Edita tu URL:        nano "$CONFIG"
    2) Calibra tus aplausos: "$DIR/run.sh" --calibrate
       (esto también dispara el diálogo de permiso de micrófono;
        acéptalo y luego reinicia el servicio)
    3) Reinicia el servicio:
       launchctl kickstart -k "gui/$(id -u)/$LABEL"
 
-Luego: aplaude DOS veces 👏👏 y suena tu playlist.
+Luego: aplaude DOS veces 👏👏 y suena tu música.
 Logs:  tail -f "$DIR/iclap.log"
 ────────────────────────────────────────────────────────
 MSG

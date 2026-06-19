@@ -5,3 +5,6 @@ iclap.log
 iclap.err
 config.json
 *.plist
+build/
+dist/
+*.egg-info/
