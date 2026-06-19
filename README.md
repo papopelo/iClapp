@@ -13,10 +13,22 @@ de la voz o la tos (más largas). No graba ni envía nada: todo es local.
 - **Spotify de escritorio** instalado (la app, no solo la web)
 - Un **micrófono** (el del MacBook sirve)
 
-## Instalación
+## Instalación rápida (un solo comando)
+
+Pega esto en la Terminal y listo:
 
 ```bash
-git clone <este-repo> iClap
+curl -fsSL https://raw.githubusercontent.com/papopelo/iClap/master/bootstrap.sh | bash
+```
+
+Clona iClap en `~/iClap` y deja el servicio cargado. (Si te falta `git` o
+`python3`, macOS te ofrecerá instalar las *Command Line Tools*; acéptalo y
+vuelve a correr el comando.)
+
+## Instalación manual
+
+```bash
+git clone https://github.com/papopelo/iClap.git
 cd iClap
 ./install.sh
 ```
