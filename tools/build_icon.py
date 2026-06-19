@@ -14,7 +14,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSET = ROOT / "Iclap.icon" / "Assets" / "aplaudir 2.png"
+ASSET = ROOT / "iClap.icon" / "Assets" / "aplaudir 2.png"
 
 SIZE = 1024
 RECT = 824          # rejilla Big Sur: rect redondeado de 824 en lienzo de 1024
