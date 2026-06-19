@@ -1,4 +1,4 @@
-"""Compone icon.icns de iClap a partir del .icon de Icon Composer.
+"""Compone icon.icns de iClapp a partir del .icon de Icon Composer.
 
 Replica el diseño: fondo degradado morado con forma de icono de macOS
 (rejilla Big Sur) + el símbolo de aplauso centrado.
@@ -14,7 +14,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSET = ROOT / "iClap.icon" / "Assets" / "aplaudir 2.png"
+ASSET = ROOT / "iClapp.icon" / "Assets" / "aplaudir 2.png"
 
 SIZE = 1024
 RECT = 824          # rejilla Big Sur: rect redondeado de 824 en lienzo de 1024

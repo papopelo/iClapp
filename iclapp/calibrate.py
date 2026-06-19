@@ -2,7 +2,7 @@
 
 Resuelve el problema central del proyecto (la sensibilidad depende del micro y
 de las manos de cada uno). Usable desde la GUI (con callback de progreso) o
-desde el CLI (`python -m iclap.calibrate`).
+desde el CLI (`python -m iclapp.calibrate`).
 """
 
 import sys

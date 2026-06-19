@@ -1,22 +1,22 @@
 #!/bin/bash
-# Instalador de iClap para macOS.
+# Instalador de iClapp para macOS.
 # Crea el entorno, deja tu config lista y arranca el detector al iniciar sesión.
 set -e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-LABEL="com.iclap.detector"
+LABEL="com.iclapp.detector"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 PY="$DIR/.venv/bin/python"
 
 cd "$DIR"
 
-echo "👏 Instalando iClap en: $DIR"
+echo "👏 Instalando iClapp en: $DIR"
 
 # 0) Aviso si Spotify no está instalado (no bloqueante: se puede instalar luego)
 if ! osascript -e 'id of application "Spotify"' >/dev/null 2>&1; then
   echo
   echo "⚠️  No encuentro la app de Spotify de escritorio."
-  echo "   iClap la necesita para reproducir. Instálala desde https://www.spotify.com/download"
+  echo "   iClapp la necesita para reproducir. Instálala desde https://www.spotify.com/download"
   echo "   (puedes seguir; solo recuerda instalar Spotify antes de aplaudir)."
   echo
 fi
@@ -30,7 +30,7 @@ if [ ! -d ".venv" ]; then
 fi
 
 # 2) Config personal en Application Support (la usa tanto el CLI como el .app)
-CONFIG_DIR="$HOME/Library/Application Support/iClap"
+CONFIG_DIR="$HOME/Library/Application Support/iClapp"
 CONFIG="$CONFIG_DIR/config.json"
 mkdir -p "$CONFIG_DIR"
 if [ ! -f "$CONFIG" ]; then
@@ -51,7 +51,7 @@ cat > "$PLIST" <<PLIST_EOF
     <array>
         <string>$PY</string>
         <string>-m</string>
-        <string>iclap</string>
+        <string>iclapp</string>
     </array>
     <key>EnvironmentVariables</key>
     <dict>
@@ -67,9 +67,9 @@ cat > "$PLIST" <<PLIST_EOF
     <key>WorkingDirectory</key>
     <string>$DIR</string>
     <key>StandardOutPath</key>
-    <string>$DIR/iclap.log</string>
+    <string>$DIR/iclapp.log</string>
     <key>StandardErrorPath</key>
-    <string>$DIR/iclap.err</string>
+    <string>$DIR/iclapp.err</string>
 </dict>
 </plist>
 PLIST_EOF
@@ -96,6 +96,6 @@ cat <<MSG
       launchctl kickstart -k "gui/$(id -u)/$LABEL"
 
 Luego: aplaude DOS veces 👏👏 y suena tu música.
-Logs:  tail -f "$DIR/iclap.log"
+Logs:  tail -f "$DIR/iclapp.log"
 ────────────────────────────────────────────────────────
 MSG

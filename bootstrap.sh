@@ -1,21 +1,21 @@
 #!/bin/bash
-# 👏 iClap — instalador de un solo comando.
+# 👏 iClapp — instalador de un solo comando.
 #
 # Para tus amigos. Dos formas de usarlo:
 #
 #   1) One-liner (no hace falta descargar nada):
-#      curl -fsSL https://raw.githubusercontent.com/papopelo/iClap/master/bootstrap.sh | bash
+#      curl -fsSL https://raw.githubusercontent.com/papopelo/iClapp/master/bootstrap.sh | bash
 #
 #   2) Con el archivo descargado:
 #      bash bootstrap.sh
 #
-# Clona iClap en ~/iClap (o actualiza si ya existe) y corre el instalador.
+# Clona iClapp en ~/iClapp (o actualiza si ya existe) y corre el instalador.
 set -e
 
-REPO="https://github.com/papopelo/iClap.git"
-DIR="$HOME/iClap"
+REPO="https://github.com/papopelo/iClapp.git"
+DIR="$HOME/iClapp"
 
-echo "👏 iClap — instalación automática"
+echo "👏 iClapp — instalación automática"
 echo
 
 # 1) Requisitos: git y python3 (en macOS, invocarlos dispara la instalación de
@@ -32,14 +32,14 @@ need python3
 
 # 2) Clonar o actualizar
 if [ -d "$DIR/.git" ]; then
-  echo "📂 Ya existe ~/iClap; actualizando..."
+  echo "📂 Ya existe ~/iClapp; actualizando..."
   git -C "$DIR" pull --ff-only
 else
   if [ -e "$DIR" ]; then
-    echo "❌ Existe ~/iClap pero no es un repo de git. Muévelo o bórralo y reintenta."
+    echo "❌ Existe ~/iClapp pero no es un repo de git. Muévelo o bórralo y reintenta."
     exit 1
   fi
-  echo "📥 Clonando iClap en ~/iClap..."
+  echo "📥 Clonando iClapp en ~/iClapp..."
   git clone --quiet "$REPO" "$DIR"
 fi
 

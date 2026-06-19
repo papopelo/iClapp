@@ -1,6 +1,6 @@
 """Ventana de Preferencias (Tkinter).
 
-Se ejecuta como proceso aparte (`python -m iclap.prefs`) para no chocar con el
+Se ejecuta como proceso aparte (`python -m iclapp.prefs`) para no chocar con el
 loop de eventos de la barra de menú y para tener el micrófono libre al calibrar.
 Al guardar, escribe la config y cierra; la app recarga al detectar el cierre.
 """
@@ -24,7 +24,7 @@ class Prefs:
         self.events = queue.Queue()
         self._calibrating = False
 
-        root.title("iClap — Preferencias")
+        root.title("iClapp — Preferencias")
         root.resizable(False, False)
         frm = ttk.Frame(root, padding=16)
         frm.grid(sticky="nsew")

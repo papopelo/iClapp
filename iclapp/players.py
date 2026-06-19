@@ -107,7 +107,7 @@ def play(url, shuffle=True):
 
 
 if __name__ == "__main__":
-    # Prueba rápida: python -m iclap.players "<url>"
+    # Prueba rápida: python -m iclapp.players "<url>"
     ok, msg = play(sys.argv[1], shuffle="--no-shuffle" not in sys.argv)
     print(msg)
     sys.exit(0 if ok else 1)

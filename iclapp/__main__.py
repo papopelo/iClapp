@@ -1,10 +1,10 @@
-"""Modo headless de iClap: escucha y reproduce, sin interfaz.
+"""Modo headless de iClapp: escucha y reproduce, sin interfaz.
 
-Lo usa el LaunchAgent (segundo plano). Para la app con interfaz, ver iclap.app.
+Lo usa el LaunchAgent (segundo plano). Para la app con interfaz, ver iclapp.app.
 
-    python -m iclap                 # escuchar
-    python -m iclap --calibrate     # recalibrar por terminal
-    python -m iclap --list-devices  # ver micrófonos disponibles
+    python -m iclapp                 # escuchar
+    python -m iclapp --calibrate     # recalibrar por terminal
+    python -m iclapp --list-devices  # ver micrófonos disponibles
 """
 
 import argparse
@@ -18,7 +18,7 @@ from .players import play
 
 
 def main():
-    parser = argparse.ArgumentParser(description="iClap — música al aplaudir dos veces.")
+    parser = argparse.ArgumentParser(description="iClapp — música al aplaudir dos veces.")
     parser.add_argument("--calibrate", action="store_true",
                         help="Mide tus aplausos y ajusta la sensibilidad.")
     parser.add_argument("--list-devices", action="store_true",

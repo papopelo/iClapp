@@ -18,7 +18,7 @@ from . import config
 from .engine import ClapEngine
 from .players import play
 
-_LOG = Path.home() / "Library" / "Logs" / "iClap.log"
+_LOG = Path.home() / "Library" / "Logs" / "iClapp.log"
 
 
 def _log(msg):
@@ -43,17 +43,17 @@ def _bundle_main_executable():
         name = plistlib.loads(info_plist.read_bytes())["CFBundleExecutable"]
         return str(macos_dir / name)
     except Exception:  # noqa: BLE001
-        return str(macos_dir / "iClap")
+        return str(macos_dir / "iClapp")
 
 
 def _spawn_prefs():
     """Lanza la ventana de Preferencias como proceso independiente."""
-    env = {**os.environ, "ICLAP_MODE": "prefs"}
+    env = {**os.environ, "ICLAPP_MODE": "prefs"}
     if getattr(sys, "frozen", False):
-        # Dentro del .app: el ejecutable principal en modo prefs (ver iclap_app.py).
+        # Dentro del .app: el ejecutable principal en modo prefs (ver iclapp_app.py).
         cmd = [_bundle_main_executable()]
     else:
-        cmd = [sys.executable, "-m", "iclap.prefs"]
+        cmd = [sys.executable, "-m", "iclapp.prefs"]
     _log(f"spawn prefs: frozen={getattr(sys, 'frozen', False)} cmd={cmd}")
     return subprocess.Popen(cmd, env=env)
 
@@ -70,7 +70,7 @@ class IClapApp(rumps.App):
             rumps.MenuItem("Preferencias…", callback=self.open_prefs),
             self.toggle_item,
             None,
-            rumps.MenuItem("Salir iClap", callback=self.quit_app),
+            rumps.MenuItem("Salir iClapp", callback=self.quit_app),
         ]
         self.start_engine()
 
@@ -99,7 +99,7 @@ class IClapApp(rumps.App):
         cfg = config.load()
         ok, msg = play(cfg["url"], cfg.get("shuffle", True))
         try:
-            rumps.notification("iClap", "👏👏", msg)
+            rumps.notification("iClapp", "👏👏", msg)
         except Exception:  # noqa: BLE001
             pass
 

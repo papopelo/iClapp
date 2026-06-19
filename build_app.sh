@@ -1,6 +1,6 @@
 #!/bin/bash
-# Construye iClap.app (sin firmar) con py2app.
-# Resultado: dist/iClap.app  — arrástralo a /Applications.
+# Construye iClapp.app (sin firmar) con py2app.
+# Resultado: dist/iClapp.app  — arrástralo a /Applications.
 set -e
 cd "$(dirname "$0")"
 
@@ -14,11 +14,11 @@ echo "📦 Instalando dependencias de build (py2app + runtime)..."
 echo "🧹 Limpiando builds anteriores..."
 rm -rf build dist
 
-echo "🔨 Construyendo iClap.app..."
+echo "🔨 Construyendo iClapp.app..."
 ./.venv/bin/python setup.py py2app
 
 echo
-echo "✅ Listo: dist/iClap.app"
-echo "   Pruébalo:  open dist/iClap.app"
+echo "✅ Listo: dist/iClapp.app"
+echo "   Pruébalo:  open dist/iClapp.app"
 echo "   Instálalo: arrástralo a la carpeta Aplicaciones."
 echo "   (App sin firmar: la 1ª vez ábrela con clic derecho → Abrir.)"

@@ -1,4 +1,4 @@
-# 👏 iClap
+# 👏 iClapp
 
 Aplaude **dos veces** y tu Mac reproduce tu playlist de Spotify en shuffle.
 Corre en segundo plano y arranca solo al iniciar sesión.
@@ -18,18 +18,18 @@ de la voz o la tos (más largas). No graba ni envía nada: todo es local.
 Pega esto en la Terminal y listo:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/papopelo/iClap/master/bootstrap.sh | bash
+curl -fsSL https://raw.githubusercontent.com/papopelo/iClapp/master/bootstrap.sh | bash
 ```
 
-Clona iClap en `~/iClap` y deja el servicio cargado. (Si te falta `git` o
+Clona iClapp en `~/iClapp` y deja el servicio cargado. (Si te falta `git` o
 `python3`, macOS te ofrecerá instalar las *Command Line Tools*; acéptalo y
 vuelve a correr el comando.)
 
 ## Instalación manual
 
 ```bash
-git clone https://github.com/papopelo/iClap.git
-cd iClap
+git clone https://github.com/papopelo/iClapp.git
+cd iClapp
 ./install.sh
 ```
 
@@ -46,7 +46,7 @@ Después haz estos tres pasos (te los recuerda al final):
    Esto además dispara el diálogo de **permiso de micrófono** de macOS: acéptalo.
 3. **Reinicia el servicio** para aplicar todo:
    ```bash
-   launchctl kickstart -k gui/$(id -u)/com.iclap.detector
+   launchctl kickstart -k gui/$(id -u)/com.iclapp.detector
    ```
 
 Listo: **aplaude dos veces** 👏👏 y suena tu playlist.
@@ -75,8 +75,8 @@ Listo: **aplaude dos veces** 👏👏 y suena tu playlist.
 ## Logs y control del servicio
 
 ```bash
-tail -f iclap.log                                     # ver actividad
-launchctl kickstart -k gui/$(id -u)/com.iclap.detector  # reiniciar
+tail -f iclapp.log                                     # ver actividad
+launchctl kickstart -k gui/$(id -u)/com.iclapp.detector  # reiniciar
 ./uninstall.sh                                        # quitar el servicio
 ```
 

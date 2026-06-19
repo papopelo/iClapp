@@ -1,19 +1,21 @@
-"""Carga/guarda la configuración de iClap.
+"""Carga/guarda la configuración de iClapp.
 
-La config vive en ~/Library/Application Support/iClap/config.json para que
+La config vive en ~/Library/Application Support/iClapp/config.json para que
 funcione tanto desde el CLI como desde el .app (un bundle no puede escribir
 dentro de sí mismo). Si no existe, se migra desde la ubicación antigua
-(~/iClap/config.json) para no perder la playlist ni la calibración.
+(~/iClapp/config.json) para no perder la playlist ni la calibración.
 """
 
 import json
 from pathlib import Path
 
-CONFIG_DIR = Path.home() / "Library" / "Application Support" / "iClap"
+CONFIG_DIR = Path.home() / "Library" / "Application Support" / "iClapp"
 CONFIG_PATH = CONFIG_DIR / "config.json"
 
-# Ubicación antigua (cuando la config vivía junto al script). Solo para migrar.
+# Ubicaciones antiguas, solo para migrar la config existente (orden de prioridad).
 LEGACY_PATHS = [
+    Path.home() / "Library" / "Application Support" / "iClap" / "config.json",
+    Path.home() / "iClapp" / "config.json",
     Path.home() / "iClap" / "config.json",
     Path.home() / "clap-spotify" / "config.json",
 ]

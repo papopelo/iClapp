@@ -1,5 +1,5 @@
 #!/bin/bash
-# iClap — crea el venv la primera vez e inicia el detector de aplausos.
+# iClapp — crea el venv la primera vez e inicia el detector de aplausos.
 set -e
 cd "$(dirname "$0")"
 
@@ -10,4 +10,4 @@ if [ ! -d ".venv" ]; then
   ./.venv/bin/pip install --quiet -r requirements.txt
 fi
 
-exec ./.venv/bin/python -m iclap "$@"
+exec ./.venv/bin/python -m iclapp "$@"
