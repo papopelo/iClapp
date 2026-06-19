@@ -149,9 +149,27 @@ class Prefs:
         self.root.destroy()
 
 
+def _bring_to_front(root):
+    """Trae la ventana al frente y le da foco.
+
+    Las apps sin icono en el Dock (LSUIElement) abren sus ventanas detrás y sin
+    foco; sin esto, Preferencias parece "no abrir".
+    """
+    root.lift()
+    root.attributes("-topmost", True)
+    root.after(300, lambda: root.attributes("-topmost", False))
+    root.focus_force()
+    try:  # activar el proceso vía AppKit (Tk ya crea una NSApplication en macOS)
+        from AppKit import NSApplication
+        NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def main():
     root = tk.Tk()
     Prefs(root)
+    root.after(50, lambda: _bring_to_front(root))
     root.mainloop()
 
 

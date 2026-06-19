@@ -9,6 +9,8 @@ import os
 import subprocess
 import sys
 import threading
+import time
+from pathlib import Path
 
 import rumps
 
@@ -16,14 +18,28 @@ from . import config
 from .engine import ClapEngine
 from .players import play
 
+_LOG = Path.home() / "Library" / "Logs" / "iClap.log"
+
+
+def _log(msg):
+    try:
+        _LOG.parent.mkdir(parents=True, exist_ok=True)
+        with open(_LOG, "a") as f:
+            f.write(f"{time.strftime('%H:%M:%S')} {msg}\n")
+    except Exception:  # noqa: BLE001
+        pass
+
 
 def _spawn_prefs():
     """Lanza la ventana de Preferencias como proceso independiente."""
     env = {**os.environ, "ICLAP_MODE": "prefs"}
     if getattr(sys, "frozen", False):
         # Dentro del .app: el mismo ejecutable, en modo prefs (ver iclap_app.py).
-        return subprocess.Popen([sys.executable], env=env)
-    return subprocess.Popen([sys.executable, "-m", "iclap.prefs"], env=env)
+        cmd = [sys.executable]
+    else:
+        cmd = [sys.executable, "-m", "iclap.prefs"]
+    _log(f"spawn prefs: frozen={getattr(sys, 'frozen', False)} cmd={cmd}")
+    return subprocess.Popen(cmd, env=env)
 
 
 class IClapApp(rumps.App):
@@ -87,8 +103,12 @@ class IClapApp(rumps.App):
         self.status_item.title = "⚙️ Preferencias abiertas…"
 
         def wait_and_reload():
-            proc = _spawn_prefs()
-            proc.wait()
+            try:
+                proc = _spawn_prefs()
+                proc.wait()
+                _log(f"prefs cerrado (rc={proc.returncode})")
+            except Exception as e:  # noqa: BLE001
+                _log(f"error al abrir prefs: {e}")
             # Al cerrar la ventana, recargar config y volver a escuchar.
             if was_running:
                 self.start_engine()
