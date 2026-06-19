@@ -12,6 +12,15 @@ cd "$DIR"
 
 echo "👏 Instalando iClap en: $DIR"
 
+# 0) Aviso si Spotify no está instalado (no bloqueante: se puede instalar luego)
+if ! osascript -e 'id of application "Spotify"' >/dev/null 2>&1; then
+  echo
+  echo "⚠️  No encuentro la app de Spotify de escritorio."
+  echo "   iClap la necesita para reproducir. Instálala desde https://www.spotify.com/download"
+  echo "   (puedes seguir; solo recuerda instalar Spotify antes de aplaudir)."
+  echo
+fi
+
 # 1) Entorno virtual + dependencias
 if [ ! -d ".venv" ]; then
   echo "📦 Creando entorno virtual e instalando dependencias..."
