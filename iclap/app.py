@@ -30,12 +30,28 @@ def _log(msg):
         pass
 
 
+def _bundle_main_executable():
+    """Ruta al ejecutable principal del .app (no al 'python' auxiliar de py2app).
+
+    sys.executable apunta a Contents/MacOS/python, que NO tiene configurado el
+    sys.path del bundle. El ejecutable principal sí corre el arranque de py2app.
+    """
+    macos_dir = Path(sys.executable).resolve().parent          # Contents/MacOS
+    info_plist = macos_dir.parent / "Info.plist"               # Contents/Info.plist
+    try:
+        import plistlib
+        name = plistlib.loads(info_plist.read_bytes())["CFBundleExecutable"]
+        return str(macos_dir / name)
+    except Exception:  # noqa: BLE001
+        return str(macos_dir / "iClap")
+
+
 def _spawn_prefs():
     """Lanza la ventana de Preferencias como proceso independiente."""
     env = {**os.environ, "ICLAP_MODE": "prefs"}
     if getattr(sys, "frozen", False):
-        # Dentro del .app: el mismo ejecutable, en modo prefs (ver iclap_app.py).
-        cmd = [sys.executable]
+        # Dentro del .app: el ejecutable principal en modo prefs (ver iclap_app.py).
+        cmd = [_bundle_main_executable()]
     else:
         cmd = [sys.executable, "-m", "iclap.prefs"]
     _log(f"spawn prefs: frozen={getattr(sys, 'frozen', False)} cmd={cmd}")
